@@ -80,6 +80,71 @@ static int string_to_int(const std::string value, const int defaultValue) {
 	return i;
 }
 
+static int show_usage(const int argc, const char* argv[])
+{
+	std::string firstArgument(argv[0]);
+	std::vector<std::string> tokens = tokenize(firstArgument, "/\\");
+
+	std::cout << "Usage: " << tokens.back() << " "
+		<< "--" << Nathandelane::NumberOfChars << "=<number-of-characters> [ "
+		<< "--" << Nathandelane::NumStringsValue << "=<number-of-strings> ] [ "
+		<< "--" << Nathandelane::Strategy << "=<strategy (one of "
+			<< Nathandelane::AllAsciiPrintableValue << "|"
+			<< Nathandelane::AlphaNumericArgValue << "|"
+			<< Nathandelane::AlphaOnlyArgValue << "|"
+			<< Nathandelane::HtmlFriendlyArgValue << "|"
+			<< Nathandelane::Custom << ":<custom-value>|(or omit for default)"
+		<< ")> ] [ "
+		<< "--" << Nathandelane::HexArgValue << " ] [ "
+		<< "--" << Nathandelane::UniqueOnlyArgValue << "] ]" << std::endl << std::endl;
+
+	return 1;
+}
+
+static void error_message(const std::string message)
+{
+	std::cerr << message << std::endl << std::endl;
+}
+
+static std::vector<std::string> roll_new_random_string(Nathandelane::RandomString * randomString, const int numStrings, const int length, const bool printHexString, const bool uniqueOnly)
+{
+	std::vector<std::string> rands;
+
+	for (int stringCounter = 0; stringCounter < numStrings; stringCounter++)
+	{
+		std::string nextString = randomString->NextString();
+		std::string nextRandomString;
+
+		for (int charIndex = 0; charIndex < length; charIndex++)
+		{
+			const char nextChar = nextString[charIndex];
+
+			nextRandomString += nextChar;
+		}
+
+		rands.push_back(nextRandomString);
+
+		if (printHexString)
+		{
+			std::string hexString;
+
+			for (int charIndex = 0; charIndex < length; charIndex++)
+			{
+				int nextChar = nextString[charIndex];
+
+				std::stringstream ss;
+				ss << std::hex << nextChar;
+
+				hexString += ss.str();
+			}
+
+			rands.push_back(hexString);
+		}
+	}
+
+	return rands;
+}
+
 int main(int argc, const char* argv[])
 {
 	std::map<std::string, Nathandelane::ICharacterSet *> characterSets = create_map();
@@ -92,23 +157,7 @@ int main(int argc, const char* argv[])
 
 	if (arguments.size() == 1)
 	{
-		std::string firstArgument(argv[0]);
-		std::vector<std::string> tokens = tokenize(firstArgument, "/\\");
-
-		std::cout << "Usage: " << tokens.back() << " "
-			<< "--" << Nathandelane::NumberOfChars << "=<number-of-characters> [ "
-			<< "--" << Nathandelane::NumStringsValue << "=<number-of-strings> ] [ "
-			<< "--" << Nathandelane::Strategy << "=<strategy (one of "
-				<< Nathandelane::AllAsciiPrintableValue << "|"
-				<< Nathandelane::AlphaNumericArgValue << "|"
-				<< Nathandelane::AlphaOnlyArgValue << "|"
-				<< Nathandelane::HtmlFriendlyArgValue << "|"
-				<< Nathandelane::Custom << ":<custom-value>|(or omit for default)"
-			<< ")> ] [ "
-			<< "--" << Nathandelane::HexArgValue << " ] [ "
-			<< "--" << Nathandelane::UniqueOnlyArgValue << "] ]" << std::endl << std::endl;
-
-		return 1;
+		return show_usage(argc, argv);
 	}
 	else if (arguments.size() >= 2)
 	{
@@ -129,7 +178,7 @@ int main(int argc, const char* argv[])
 					characterSet = characterSets[commandLine->get_arg_value(Nathandelane::Strategy)];
 				}
 				else {
-					std::cerr << "ERROR: Misunderstood strategy - defaulting to default character set!" << std::endl;
+					error_message("ERROR: Misunderstood strategy - defaulting to default character set!");
 				}
 			}
 			else if (commandLine->get_arg_value(Nathandelane::Strategy).compare(0, custom.length(), custom) == 0)
@@ -147,30 +196,13 @@ int main(int argc, const char* argv[])
 
 			try
 			{
-				for (int stringCounter = 0; stringCounter < numStrings; stringCounter++)
+				std::vector<std::string> strings = roll_new_random_string(&randomString, numStrings, length, printHexString, uniqueOnly);
+
+				for (std::vector<std::string>::iterator it = strings.begin(); it != strings.end(); it++)
 				{
-					std::string nextString = randomString.NextString();
+					const std::string nextString = *it;
 
-					for (int charIndex = 0; charIndex < length; charIndex++)
-					{
-						char nextChar = nextString[charIndex];
-
-						std::cout << nextChar;
-					}
-
-					std::cout << std::endl;
-
-					if (printHexString)
-					{
-						for (int charIndex = 0; charIndex < length; charIndex++)
-						{
-							int nextChar = nextString[charIndex];
-
-							std::cout << std::hex << nextChar;
-						}
-
-						std::cout << std::endl;
-					}
+					std::cout << nextString << std::endl;
 				}
 			}
 			catch(Nathandelane::UniqueLengthException& ex)
@@ -180,13 +212,14 @@ int main(int argc, const char* argv[])
 			}
 			catch(std::exception& ex)
 			{
-				std::cout << "Unexpected exception occurred: " << ex.what() << std::endl << std::endl;
+				const std::string what(ex.what());
+				error_message("Unexpected exception occurred: " + what);
 				return 1;
 			}
 		}
 		else
 		{
-			std::cout << "Length must be greater than zero.";
+			error_message("Error: --" + Nathandelane::NumberOfChars + " must be greater than zero.");
 		}
 	}
 
