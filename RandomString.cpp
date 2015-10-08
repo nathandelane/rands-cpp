@@ -66,7 +66,7 @@ namespace Nathandelane
 	std::string RandomString::GenerateRandomString()
 	{
 		std::stringstream retVal;
-		std::string possibleCharacters = (* _characterSet).GetCharacters();
+		std::string possibleCharacters = (* _characterSet).getCharacters();
 		unsigned int charCounter = 0;
 
 		while (charCounter <= _length)
@@ -100,7 +100,7 @@ namespace Nathandelane
 			throw UniqueLengthException(message.c_str());
 		}
 
-		std::string remainingPrintableCharacters = (* _characterSet).GetCharacters();
+		std::string remainingPrintableCharacters = (* _characterSet).getCharacters();
 		unsigned int charCounter = 0;
 		unsigned int numberOfPossibleCharacters = remainingPrintableCharacters.size();
 

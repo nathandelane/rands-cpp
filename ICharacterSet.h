@@ -16,7 +16,7 @@ namespace Nathandelane
 	class ICharacterSet
 	{
 	public:
-		virtual std::string GetCharacters() = 0;
+		virtual std::string getCharacters() = 0;
 		virtual unsigned int Size() = 0;
 	};
 

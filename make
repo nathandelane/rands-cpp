@@ -1,1 +1,1 @@
-g++ -o rands AllAsciiPrintable.cpp AlphaCharacterSet.cpp AlphaNumericCharacterSet.cpp DefaultCharacterSet.cpp HtmlFriendlyCharacterSet.cpp RandomString.cpp UniqueCharacterSet.cpp UniqueLengthException.cpp main.cpp
+g++ -fpermissive -o rands CommandLine.cpp AllAsciiPrintable.cpp AlphaCharacterSet.cpp AlphaNumericCharacterSet.cpp DefaultCharacterSet.cpp HtmlFriendlyCharacterSet.cpp RandomString.cpp UniqueCharacterSet.cpp UniqueLengthException.cpp CustomCharacterSet.cpp main.cpp

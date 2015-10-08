@@ -17,14 +17,14 @@ namespace Nathandelane
 	 */
 	DefaultCharacterSet::DefaultCharacterSet()
 	{
-		_characters = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+		_characters = "0123456789abcdefghijklmnopqrstuvwxyz";
 		_size = _characters.size();
 	}
 
 	/**
 	 * Gets the characters associated with this CharacterSet.
 	 */
-	std::string DefaultCharacterSet::GetCharacters()
+	std::string DefaultCharacterSet::getCharacters()
 	{
 		random_shuffle(_characters.begin(), _characters.end());
 

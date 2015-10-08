@@ -21,7 +21,7 @@ namespace Nathandelane
 		std::string _characters;
 	public:
 		UniqueCharacterSet(const char* characters);
-		std::string GetCharacters();
+		std::string getCharacters();
 		unsigned int Size();
 	};
 

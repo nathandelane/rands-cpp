@@ -21,7 +21,7 @@ namespace Nathandelane
 		std::string _characters;
 	public:
 		AllAsciiPrintable();
-		std::string GetCharacters();
+		std::string getCharacters();
 		unsigned int Size();
 	};
 

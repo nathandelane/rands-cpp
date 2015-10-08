@@ -11,13 +11,19 @@
 namespace Nathandelane
 {
 
-	const std::string HexArgValue("hex");
+	// Character sets or strategies
 	const std::string HtmlFriendlyArgValue("htmlfriendly");
-	const std::string UniqueOnlyArgValue("uniqueonly");
 	const std::string AlphaOnlyArgValue("alphaonly");
 	const std::string AlphaNumericArgValue("alphanumeric");
 	const std::string AllAsciiPrintableValue("allasciiprintable");
+	const std::string Custom("custom");
+
+	// Command-line arguments, must begin with --argument
+	const std::string NumberOfChars("numchars");
 	const std::string NumStringsValue("numstrings");
+	const std::string Strategy("strategy");
+	const std::string HexArgValue("hex");
+	const std::string UniqueOnlyArgValue("uniqueonly");
 
 }
 

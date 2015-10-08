@@ -13,6 +13,11 @@
 #include <exception>
 #include <stdexcept>
 #include <vector>
+#include <map>
+#include <iterator>
+#include <sstream>
+#include "Constants.h"
+#include "CommandLine.h"
 #include "RandomString.h"
 #include "UniqueLengthException.h"
 #include "ICharacterSet.h"
@@ -22,11 +27,12 @@
 #include "AlphaCharacterSet.h"
 #include "AlphaNumericCharacterSet.h"
 #include "UniqueCharacterSet.h"
+#include "CustomCharacterSet.h"
 
 /**
  * Tokenizes a string.
  */
-std::vector<std::string> tokenize(const std::string & str, const std::string delimiters)
+static std::vector<std::string> tokenize(const std::string & str, const std::string delimiters)
 {
 	std::vector<std::string> result;
 	std::string::size_type lastPos = str.find_first_not_of(delimiters, 0);
@@ -43,151 +49,147 @@ std::vector<std::string> tokenize(const std::string & str, const std::string del
 	return result;
 }
 
+/**
+ * Creates a map of character sets with their names as keys.
+ */
+static std::map<std::string, Nathandelane::ICharacterSet *> create_map()
+{
+	std::map<std::string, Nathandelane::ICharacterSet *> map;
+	map[Nathandelane::AllAsciiPrintableValue] = (new Nathandelane::AllAsciiPrintable());
+	map[Nathandelane::AlphaNumericArgValue] = (new Nathandelane::AlphaNumericCharacterSet());
+	map[Nathandelane::AlphaOnlyArgValue] = (new Nathandelane::AlphaCharacterSet());
+	map[Nathandelane::HtmlFriendlyArgValue] = (new Nathandelane::HtmlFriendlyCharacterSet());
+
+	return map;
+}
+
+static int string_to_int(const std::string value, const int defaultValue) {
+	int i;
+
+	if (!value.empty())
+	{
+		std::stringstream str(value);
+
+		str >> i;
+	}
+	else
+	{
+		i = defaultValue;
+	}
+
+	return i;
+}
+
 int main(int argc, const char* argv[])
 {
-	const std::string HexArgValue("hex");
-	const std::string HtmlFriendlyArgValue("htmlfriendly");
-	const std::string UniqueOnlyArgValue("uniqueonly");
-	const std::string AlphaOnlyArgValue("alphaonly");
-	const std::string AlphaNumericArgValue("alphanumeric");
-	const std::string AllAsciiPrintableValue("allasciiprintable");
-	const std::string NumStringsValue("numstrings");
+	std::map<std::string, Nathandelane::ICharacterSet *> characterSets = create_map();
 
-	int length;
-	int numStrings = 1;
-	bool printHexString = false;
-	bool uniqueOnly = false;
 	Nathandelane::ICharacterSet * characterSet = (new Nathandelane::DefaultCharacterSet());
 
-	if (argc == 1)
+	const std::vector<std::string> arguments(argv, argv + argc);
+
+	Nathandelane::CommandLine * commandLine = (new Nathandelane::CommandLine(arguments));
+
+	if (arguments.size() == 1)
 	{
 		std::string firstArgument(argv[0]);
 		std::vector<std::string> tokens = tokenize(firstArgument, "/\\");
 
-		std::cout << "Usage: " << tokens.back() << " NUMBER-OF-CHARS [" << NumStringsValue << "=<number of strings>] [ [CHARS-TO-USE|" << HtmlFriendlyArgValue << "|" << AlphaOnlyArgValue << "|" << AlphaNumericArgValue << "|" << AllAsciiPrintableValue << " (last named character set overrides)] [" << HexArgValue << "] [" << UniqueOnlyArgValue << "] ]" << std::endl << std::endl;
+		std::cout << "Usage: " << tokens.back() << " "
+			<< "--" << Nathandelane::NumberOfChars << "=<number-of-characters> [ "
+			<< "--" << Nathandelane::NumStringsValue << "=<number-of-strings> ] [ "
+			<< "--" << Nathandelane::Strategy << "=<strategy (one of "
+				<< Nathandelane::AllAsciiPrintableValue << "|"
+				<< Nathandelane::AlphaNumericArgValue << "|"
+				<< Nathandelane::AlphaOnlyArgValue << "|"
+				<< Nathandelane::HtmlFriendlyArgValue << "|"
+				<< Nathandelane::Custom << ":<custom-value>|(or omit for default)"
+			<< ")> ] [ "
+			<< "--" << Nathandelane::HexArgValue << " ] [ "
+			<< "--" << Nathandelane::UniqueOnlyArgValue << "] ]" << std::endl << std::endl;
 
 		return 1;
 	}
-	else if (argc >= 2)
+	else if (arguments.size() >= 2)
 	{
-		std::string numberOfChars = std::string(argv[1]);
-		std::stringstream ss(numberOfChars);
-		ss >> length;
+		const int length = string_to_int(commandLine->get_arg_value(Nathandelane::NumberOfChars), 0);
+		const int numStrings = string_to_int(commandLine->get_arg_value(Nathandelane::NumStringsValue), 1);
+		const bool printHexString = !commandLine->get_arg_value(Nathandelane::HexArgValue).empty();
+		const bool uniqueOnly = !commandLine->get_arg_value(Nathandelane::UniqueOnlyArgValue).empty();
 
-		if (argc >= 3)
+		if (!commandLine->get_arg_value(Nathandelane::Strategy).empty())
 		{
-			for (int argIndex = 2; argIndex < argc; argIndex++)
+			const std::string custom("custom");
+
+			if (!commandLine->get_arg_value(Nathandelane::Strategy).compare(0, custom.length(), custom) == 0)
 			{
-				std::string nextArgument(argv[argIndex]);
+				const std::map<std::string, Nathandelane::ICharacterSet *>::iterator it = characterSets.find(commandLine->get_arg_value(Nathandelane::Strategy));
 
-				if (nextArgument.compare(HexArgValue) == 0)
-				{
-					printHexString = true;
+				if (it != characterSets.end()) {
+					characterSet = characterSets[commandLine->get_arg_value(Nathandelane::Strategy)];
 				}
-				else if (nextArgument.find_first_of("=") != std::string::npos)
-				{
-					std::vector<std::string> nextArgTokens = tokenize(nextArgument, "=");
-
-					if (nextArgTokens.size() == 2)
-					{
-						if ((nextArgTokens.front()).compare(NumStringsValue) == 0)
-						{
-							std::string numberOfStrings = nextArgTokens.back();
-							std::stringstream numStringsStream(numberOfStrings);
-
-							if (!(numStringsStream >> numStrings))
-							{
-								std::cout << NumStringsValue << " value must be an integer greater than 0." << std::endl << std::endl;
-								return 1;
-							}
-						}
-						else
-						{
-							std::cout << nextArgTokens.front() << "= is not recognized as a valid argument." << std::endl << std::endl;
-							return 2;
-						}
-					}
-					else
-					{
-						std::cout << "No rvalue found for argument " << nextArgTokens.front() << "=" << std::endl << std::endl;
-						return 3;
-					}
-				}
-				else if (nextArgument.compare(HtmlFriendlyArgValue) == 0)
-				{
-					characterSet = (new Nathandelane::HtmlFriendlyCharacterSet());
-				}
-				else if (nextArgument.compare(AlphaOnlyArgValue) == 0)
-				{
-					characterSet = (new Nathandelane::AlphaCharacterSet());
-				}
-				else if (nextArgument.compare(AlphaNumericArgValue) == 0)
-				{
-					characterSet = (new Nathandelane::AlphaNumericCharacterSet());
-				}
-				else if (nextArgument.compare(UniqueOnlyArgValue) == 0)
-				{
-					uniqueOnly = true;
-				}
-				else if (nextArgument.compare(AllAsciiPrintableValue) == 0)
-				{
-					characterSet = (new Nathandelane::AllAsciiPrintable());
-				}
-				else
-				{
-					characterSet = (new Nathandelane::UniqueCharacterSet(argv[argIndex]));
+				else {
+					std::cerr << "ERROR: Misunderstood strategy - defaulting to default character set!" << std::endl;
 				}
 			}
-		}
-	}
-
-	if (length > 0)
-	{
-		Nathandelane::RandomString randomString(length, * characterSet, uniqueOnly);
-
-		try
-		{
-			for (int stringCounter = 0; stringCounter < numStrings; stringCounter++)
+			else if (commandLine->get_arg_value(Nathandelane::Strategy).compare(0, custom.length(), custom) == 0)
 			{
-				std::string nextString = randomString.NextString();
+				const std::string strategyValue = commandLine->get_arg_value(Nathandelane::Strategy);
+				const std::string customCharacterSet = strategyValue.substr(strategyValue.find(":") + 1);
 
-				for (int charIndex = 0; charIndex < length; charIndex++)
+				characterSet = (new Nathandelane::CustomCharacterSet(customCharacterSet));
+			}
+		}
+
+		if (length > 0)
+		{
+			Nathandelane::RandomString randomString(length, * characterSet, uniqueOnly);
+
+			try
+			{
+				for (int stringCounter = 0; stringCounter < numStrings; stringCounter++)
 				{
-					char nextChar = nextString[charIndex];
+					std::string nextString = randomString.NextString();
 
-					std::cout << nextChar;
-				}
-
-				std::cout << std::endl;
-
-				if (printHexString)
-				{
 					for (int charIndex = 0; charIndex < length; charIndex++)
 					{
-						int nextChar = nextString[charIndex];
+						char nextChar = nextString[charIndex];
 
-						std::cout << std::hex << nextChar;
+						std::cout << nextChar;
 					}
 
 					std::cout << std::endl;
+
+					if (printHexString)
+					{
+						for (int charIndex = 0; charIndex < length; charIndex++)
+						{
+							int nextChar = nextString[charIndex];
+
+							std::cout << std::hex << nextChar;
+						}
+
+						std::cout << std::endl;
+					}
 				}
 			}
+			catch(Nathandelane::UniqueLengthException& ex)
+			{
+				std::cout << ex.what() << std::endl << std::endl;
+				return 1;
+			}
+			catch(std::exception& ex)
+			{
+				std::cout << "Unexpected exception occurred: " << ex.what() << std::endl << std::endl;
+				return 1;
+			}
 		}
-		catch(Nathandelane::UniqueLengthException& ex)
+		else
 		{
-			std::cout << ex.what() << std::endl << std::endl;
-			return 1;
-		}
-		catch(std::exception& ex)
-		{
-			std::cout << "Unexpected exception occurred: " << ex.what() << std::endl << std::endl;
-			return 1;
+			std::cout << "Length must be greater than zero.";
 		}
 	}
-	else
-	{
-		std::cout << "Length must be greater than zero.";
-	}
+
 
 	std::cout << std::endl << std::endl;
 
