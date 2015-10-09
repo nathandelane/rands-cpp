@@ -23,7 +23,7 @@ namespace Nathandelane
 	/**
 	 * Gets the available characters for an HTML-friendly character set.
 	 */
-	std::string HtmlFriendlyCharacterSet::getCharacters()
+	std::string HtmlFriendlyCharacterSet::get_characters()
 	{
 		random_shuffle(_characters.begin(), _characters.end());
 

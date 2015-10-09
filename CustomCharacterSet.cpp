@@ -24,7 +24,7 @@ CustomCharacterSet::CustomCharacterSet(const std::string characters)
 	/**
 	 * Gets the characters associated with this CharacterSet.
 	 */
-	std::string CustomCharacterSet::getCharacters()
+	std::string CustomCharacterSet::get_characters()
 	{
 		random_shuffle(_characters.begin(), _characters.end());
 

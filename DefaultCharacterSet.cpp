@@ -24,7 +24,7 @@ namespace Nathandelane
 	/**
 	 * Gets the characters associated with this CharacterSet.
 	 */
-	std::string DefaultCharacterSet::getCharacters()
+	std::string DefaultCharacterSet::get_characters()
 	{
 		random_shuffle(_characters.begin(), _characters.end());
 
