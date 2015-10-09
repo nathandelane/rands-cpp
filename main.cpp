@@ -96,7 +96,7 @@ static int show_usage(const int argc, const char* argv[])
 			<< Nathandelane::Custom << ":<custom-value>|(or omit for default)"
 		<< ")> ] [ "
 		<< "--" << Nathandelane::HexArgValue << " ] [ "
-		<< "--" << Nathandelane::UniqueOnlyArgValue << "] ]" << std::endl << std::endl;
+		<< "--" << Nathandelane::UniqueOnlyArgValue << " ] ]" << std::endl << std::endl;
 
 	return 1;
 }
