@@ -17,7 +17,7 @@ namespace Nathandelane
 	{
 	public:
 		virtual std::string getCharacters() = 0;
-		virtual unsigned int Size() = 0;
+		virtual unsigned int size() = 0;
 	};
 
 }

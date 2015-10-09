@@ -22,7 +22,7 @@ namespace Nathandelane
 	public:
 		AlphaCharacterSet();
 		std::string getCharacters();
-		unsigned int Size();
+		unsigned int size();
 	};
 
 }

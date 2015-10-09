@@ -33,7 +33,7 @@ namespace Nathandelane
 	/**
 	 * Gets the number of characters in the character set.
 	 */
-	unsigned int HtmlFriendlyCharacterSet::Size()
+	unsigned int HtmlFriendlyCharacterSet::size()
 	{
 		return _size;
 	}

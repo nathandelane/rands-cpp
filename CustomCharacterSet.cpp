@@ -34,7 +34,7 @@ CustomCharacterSet::CustomCharacterSet(const std::string characters)
 	/**
 	 * Gets the number of characters in this CharacterSet.
 	 */
-	unsigned int CustomCharacterSet::Size()
+	unsigned int CustomCharacterSet::size()
 	{
 		return _size;
 	}

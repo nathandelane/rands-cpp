@@ -34,7 +34,7 @@ namespace Nathandelane
 	/**
 	 * Gets the number of characters in this CharacterSet.
 	 */
-	unsigned int DefaultCharacterSet::Size()
+	unsigned int DefaultCharacterSet::size()
 	{
 		return _size;
 	}

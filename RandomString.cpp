@@ -71,7 +71,7 @@ namespace Nathandelane
 
 		while (charCounter <= _length)
 		{
-			unsigned int nextCharIndex = rand() % (* _characterSet).Size();
+			unsigned int nextCharIndex = rand() % (* _characterSet).size();
 			char nextChar = possibleCharacters[nextCharIndex];
 
 			retVal << nextChar;
@@ -90,10 +90,10 @@ namespace Nathandelane
 	{
 		std::stringstream retVal;
 
-		if (_length > (* _characterSet).Size())
+		if (_length > (* _characterSet).size())
 		{
 			std::stringstream ss;
-			ss << "Requested length (" << _length << ") was greater than possible characters (" << (* _characterSet).Size() << ") for unique random string.";
+			ss << "Requested length (" << _length << ") was greater than possible characters (" << (* _characterSet).size() << ") for unique random string.";
 
 			std::string message = ss.str();
 
